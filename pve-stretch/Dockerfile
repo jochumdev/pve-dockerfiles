@@ -39,6 +39,6 @@ RUN apt-get -qq update && apt-get install -y wget systemd dbus && \
                         asciidoc libnet1-dev libnl-3-dev libprotobuf-c-dev libprotobuf-dev \
                         protobuf-c-compiler protobuf-compiler \
                         cm-super-minimal iptables-dev libatm1-dev libdb-dev libmnl-dev linuxdoc-tools \
-                        dh-exec libdbus-1-dev librdmacm-dev libsnmp-dev libstatgrab-dev libxml2-dev
+                        dh-exec libdbus-1-dev librdmacm-dev libsnmp-dev libstatgrab-dev libxml2-dev bison
 
 CMD ["bash"]
