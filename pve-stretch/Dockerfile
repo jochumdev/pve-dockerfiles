@@ -21,7 +21,7 @@
                                 pve-libspice-server-dev libusbredirparser-dev glusterfs-common \
                                 libusb-1.0-0-dev librbd-dev libpopt-dev iproute bridge-utils numactl \
                                 glusterfs-common ceph-common python-ceph libgoogle-perftools4 \
-                                libfile-chdir-perl lvm2 glusterfs-client liblockfile-simple-perl \
+                                libfile-chdir-perl glusterfs-client liblockfile-simple-perl \
                                 libsystemd-dev libreadline-gplv2-dev libio-multiplex-perl \
                                 libnetfilter-log-dev libipset3 ipset socat libsasl2-dev libogg-dev \
                                 python-pyparsing libfilesys-df-perl libcrypt-ssleay-perl \
