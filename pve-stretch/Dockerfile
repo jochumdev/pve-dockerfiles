@@ -1,13 +1,25 @@
-FROM scratch
+FROM pcdummy/stretch-systemd
 
-ADD rootfs.tar.xz /
+ENV DEBIAN_FRONTEND noninteractive
+ENV container docker
 
-RUN apt-get -qq update && apt-get install -y wget systemd dbus && \
+LABEL maintainer="rene@jochums.at"
+
+# Fixup LVM2
+RUN apt-get install -y lvm2 && echo "lvm2 hold" | dpkg --set-selections
+
+# Add the pvetest repository
+RUN apt-get -qq update && apt-get install -y wget && \
         wget http://download.proxmox.com/debian/proxmox-ve-release-5.x.gpg -O /etc/apt/trusted.gpg.d/proxmox-ve-release-5.x.gpg && \
         echo "deb http://download.proxmox.com/debian/pve stretch pvetest" > /etc/apt/sources.list.d/pvetest.list && \
         echo -e "127.0.0.1\tpvelocalhost" >> /etc/hosts && \
-        apt-get -qq update && apt-get -qq dist-upgrade -y && \
-        apt-get install -y build-essential git-core git-email debhelper \
+        apt-get -qq update && apt-get -qq dist-upgrade -y
+
+# Install some packages from stretch-backports else we get errors
+RUN apt-get install -y -t stretch-backports iptables iptables-dev ipset
+
+# # Install all dev packages needed to build pve packages
+RUN apt-get install -y build-essential git-core git-email debhelper \
                         autotools-dev autogen dh-autoreconf dkms doxygen check pkg-config \
                         groff quilt dpatch automake autoconf libtool lintian libdevel-cycle-perl \
                         libjson-perl libcommon-sense-perl liblinux-inotify2-perl libio-stringy-perl \
@@ -23,7 +35,7 @@ RUN apt-get -qq update && apt-get install -y wget systemd dbus && \
                         glusterfs-common ceph-common python-ceph libgoogle-perftools4 \
                         libfile-chdir-perl glusterfs-client liblockfile-simple-perl \
                         libsystemd-dev libreadline-gplv2-dev libio-multiplex-perl \
-                        libnetfilter-log-dev libipset3 ipset socat libsasl2-dev libogg-dev \
+                        libnetfilter-log-dev libipset3 socat libsasl2-dev libogg-dev \
                         python-pyparsing libfilesys-df-perl libcrypt-ssleay-perl \
                         libfile-readbackwards-perl libanyevent-perl libanyevent-http-perl \
                         unzip liblocale-po-perl libfile-sync-perl cstream \
@@ -38,7 +50,12 @@ RUN apt-get -qq update && apt-get install -y wget systemd dbus && \
                         help2man libpam0g-dev node-es6-module-transpiler librsvg2-bin \
                         asciidoc libnet1-dev libnl-3-dev libprotobuf-c-dev libprotobuf-dev \
                         protobuf-c-compiler protobuf-compiler \
-                        cm-super-minimal iptables-dev libatm1-dev libdb-dev libmnl-dev linuxdoc-tools \
-                        dh-exec libdbus-1-dev librdmacm-dev libsnmp-dev libstatgrab-dev libxml2-dev bison
+                        cm-super-minimal libatm1-dev libdb-dev libmnl-dev linuxdoc-tools \
+                        dh-exec libdbus-1-dev librdmacm-dev libsnmp-dev libstatgrab-dev libxml2-dev bison \
+                        initramfs-tools
 
-CMD ["bash"]
+# Install pve packages which are needed to build new pve packages
+RUN apt-get install -y pve-manager pve-qemu-kvm qemu-server spiceterm vncterm && \
+        rm -f /etc/apt/sources.list.d/pve-enterprise.list
+
+CMD ["/lib/systemd/systemd"]

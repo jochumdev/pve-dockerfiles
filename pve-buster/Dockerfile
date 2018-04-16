@@ -1,13 +1,20 @@
-FROM scratch
+FROM pcdummy/buster-systemd
 
-ADD rootfs.tar.xz /
+ENV DEBIAN_FRONTEND noninteractive
+ENV container docker
 
-RUN apt-get -qq update && apt-get install -y wget systemd && \
+LABEL maintainer="rene@jochums.at"
+
+# Add the pvetest repository
+RUN apt-get -qq update && apt-get install -y wget && \
         wget -O /etc/apt/trusted.gpg.d/lxch-pve-release.gpg http://repo.lxch.eu/~pve/lxch_pve_release.gpg && \
         echo "deb http://repo.lxch.eu/~pve/debian buster-pvetest/" > /etc/apt/sources.list.d/buster-pvetest.list && \
         echo -e "127.0.0.1\tpvelocalhost" >> /etc/hosts && \
-        apt-get -qq update && apt-get -qq dist-upgrade -y && \
-        apt-get install -y build-essential git-core git-email debhelper \
+        apt-get -qq update && apt-get -qq dist-upgrade -y
+
+# Install all dev packages needed to build pve packages
+RUN apt-get install -y build-essential git-core git-email debhelper \
+                        iptables iptables-dev ipset \
                         autotools-dev autogen dh-autoreconf dkms doxygen check pkg-config \
                         groff quilt dpatch automake autoconf libtool lintian libdevel-cycle-perl \
                         libjson-perl libcommon-sense-perl liblinux-inotify2-perl libio-stringy-perl \
@@ -21,9 +28,9 @@ RUN apt-get -qq update && apt-get install -y wget systemd && \
                         pve-libspice-server-dev libusbredirparser-dev glusterfs-common \
                         libusb-1.0-0-dev librbd-dev libpopt-dev iproute2 bridge-utils numactl \
                         glusterfs-common ceph-common python-ceph libgoogle-perftools4 \
-                        libfile-chdir-perl lvm2 glusterfs-client liblockfile-simple-perl \
+                        libfile-chdir-perl glusterfs-client liblockfile-simple-perl \
                         libsystemd-dev libreadline-gplv2-dev libio-multiplex-perl \
-                        libnetfilter-log-dev libipset3 ipset socat libsasl2-dev libogg-dev \
+                        libnetfilter-log-dev libipset3 socat libsasl2-dev libogg-dev \
                         python-pyparsing libfilesys-df-perl libcrypt-ssleay-perl \
                         libfile-readbackwards-perl libanyevent-perl libanyevent-http-perl \
                         unzip liblocale-po-perl libfile-sync-perl cstream \
@@ -38,7 +45,12 @@ RUN apt-get -qq update && apt-get install -y wget systemd && \
                         help2man libpam0g-dev node-es6-module-transpiler librsvg2-bin \
                         asciidoc libnet1-dev libnl-3-dev libprotobuf-c-dev libprotobuf-dev \
                         protobuf-c-compiler protobuf-compiler \
-                        cm-super-minimal iptables-dev libatm1-dev libdb-dev libmnl-dev linuxdoc-tools \
-                        dh-exec libdbus-1-dev librdmacm-dev libsnmp-dev libstatgrab-dev libxml2-dev bison
+                        cm-super-minimal libatm1-dev libdb-dev libmnl-dev linuxdoc-tools \
+                        dh-exec libdbus-1-dev librdmacm-dev libsnmp-dev libstatgrab-dev libxml2-dev bison \
+                        initramfs-tools
 
-CMD ["bash"]
+# Install pve packages which are needed to build new pve packages
+RUN apt-get install -y pve-manager pve-qemu-kvm qemu-server spiceterm vncterm && \
+        rm -f /etc/apt/sources.list.d/pve-enterprise.list
+
+CMD ["/lib/systemd/systemd"]
