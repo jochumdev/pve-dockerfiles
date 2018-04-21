@@ -47,7 +47,7 @@ RUN apt-get install -y build-essential git-core git-email debhelper \
                         protobuf-c-compiler protobuf-compiler \
                         cm-super-minimal libatm1-dev libdb-dev libmnl-dev linuxdoc-tools \
                         dh-exec libdbus-1-dev librdmacm-dev libsnmp-dev libstatgrab-dev libxml2-dev bison \
-                        initramfs-tools
+                        initramfs-tools python-all dctrl-tools bash-completion
 
 # Install pve packages which are needed to build new pve packages
 RUN apt-get install -y pve-manager pve-qemu-kvm qemu-server spiceterm vncterm && \
